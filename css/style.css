@@ -4,6 +4,11 @@
     box-sizing: border-box;
 }
 
+body {
+    font-family: tahoma;
+    color:#282828;
+}
+
 .card{
     display: flex;
     flex-direction: column;
@@ -26,4 +31,51 @@
 .card-form{
     display: flex;
     flex-direction: column;
+}
+
+.card-text{
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    gap: 5px;
+}
+
+.main-menu{
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 50px;
+}
+
+.menu{
+    display: flex;
+    flex-direction: column;
+}
+
+.btns{
+    display: flex;
+    gap: 30px;
+}
+
+button{
+    background: white;
+    border: 2px solid black;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+button:hover{
+    background: #f1f1f1;
+}
+
+input{
+    border: 2px solid black;
+    border-radius: 5px;
+    padding: 2px;
+}
+
+.buttons{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }

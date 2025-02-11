@@ -161,50 +161,45 @@ Vue.component("plan-work", {
                 this.deadline = null
 
                 this.plans.push(cardInWork)
-                this.errors.pop()
-                this.errors.pop()
-                this.errors.pop()
+                this.saveData();
+
+                this.errors = [];
             }
             
             else{
-                this.errors.pop()
-                this.errors.pop()
-                this.errors.pop()
+               this.errors = [];
                 
-                if(!this.title) {
+                if(!this.title){
                     this.errors.push("Title required.")
                 }
 
-                if(!this.description) {
+                if(!this.description){
                     this.errors.push("Description required.")
                 }
 
-                if(!this.deadline) {
+                if(!this.deadline){
                     this.errors.push("Deadline required.")
                 }
             }
         },
 
-        goFromPlan(index) {
+        goFromPlan(index){
             let toWork = this.plans.splice(index, 1)[0]
 
             this.works.push(toWork)
+            this.saveData()
 
-            localStorage.setItem('works', JSON.stringify(this.works))
-            localStorage.setItem('tests', JSON.stringify(this.tests))
-            localStorage.setItem('complete', JSON.stringify(this.complete))
+       
         },
 
-        goWork(index) {
+        goWork(index){
             let toWork = this.tests.splice(index, 1)[0]
             this.works.push(toWork)
 
             toWork.reasons.push(this.reason)
+            this.saveData()
 
-            localStorage.setItem('reasons', JSON.stringify(toWork.reasons))
-            localStorage.setItem('works', JSON.stringify(this.works))
-            localStorage.setItem('tests', JSON.stringify(this.tests))
-            localStorage.setItem('complete', JSON.stringify(this.complete))
+         
         },
 
         goTest(index){
@@ -212,13 +207,12 @@ Vue.component("plan-work", {
 
             this.tests.push(toTest)
 
-            localStorage.setItem('works', JSON.stringify(this.works))
-            localStorage.setItem('tests', JSON.stringify(this.tests))
-            localStorage.setItem('complete', JSON.stringify(this.complete))
+            this.saveData()
+            toTest.isReturn = false
             toTest.isReturn = false
         },
 
-        completeTask(index) {
+        completeTask(index){
             let toComplete = this.tests.splice(index, 1)[0]
 
             this.complete.push(toComplete)
@@ -227,12 +221,10 @@ Vue.component("plan-work", {
                 this.isTime = 'Задача просрочена'
             }
 
-            localStorage.setItem('works', JSON.stringify(this.works))
-            localStorage.setItem('tests', JSON.stringify(this.tests))
-            localStorage.setItem('complete', JSON.stringify(this.complete))
+            this.saveData()
         },
 
-        edit(index) {
+        edit(index){
             let plan = this.plans[index]
             plan.isEdit = true
         },
@@ -253,14 +245,20 @@ Vue.component("plan-work", {
             }
 
             plan.isEdit = false
+            this.saveData()
         },
+
         editCancel(index){
             let plan = this.plans[index]
             plan.isEdit = false
+
+            this.saveData()
         },
         
         deleteCard(index){
             let deleting = this.plans.splice(index, 1)[0]
+
+            this.saveData()
         },
 
         setReason(index){
@@ -271,6 +269,13 @@ Vue.component("plan-work", {
         cancelReturn(index){
             let toTest = this.tests[index]
             toTest.isReturn = false
+        },
+
+        saveData(){
+            localStorage.setItem('plans', JSON.stringify(this.plans))
+            localStorage.setItem('works', JSON.stringify(this.works))
+            localStorage.setItem('tests', JSON.stringify(this.tests))
+            localStorage.setItem('complete', JSON.stringify(this.complete))
         }
     },
 
@@ -295,6 +300,13 @@ Vue.component("plan-work", {
             tests: [],
             complete: []
         }
+    },
+
+    mounted(){
+        this.plans = JSON.parse(localStorage.getItem('plans')) || []
+        this.works = JSON.parse(localStorage.getItem('works')) || []
+        this.tests = JSON.parse(localStorage.getItem('tests')) || []
+        this.complete = JSON.parse(localStorage.getItem('complete')) || []
     },
 
     computed:{
