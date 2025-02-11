@@ -1,6 +1,145 @@
+const formatter = new Intl.DateTimeFormat('ru', {
+    year: 'numeric',
+    month: 'numeric',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: 'numeric'
+})
+
 Vue.component("plan-work", {
     template: `
-    
+     <div class="main-menu">
+        
+        <div class="menu">
+            <div class="plan-work card">
+                <h2>Планирование задачи</h2>
+                <form @submit.prevent>
+                    <div class="card-form">
+                        <label for="card-title">Заголовок</label>
+                        <input v-model="title" type="text" id="card-title">
+                    </div>
+                    <div class="card-form">
+                        <label for="card-desc">Описание</label>
+                        <input v-model="description" type="text" id="card-desc">
+                    </div>
+                    <div class="card-form">
+                        <label for="card-deadline">Дэдлайн</label>
+                        <input v-model="deadline" type="date" id="card-deadline">
+                    </div>
+                    <button type="submit" @click="createCard">Создать карточку</button>
+                    <p v-if="errors.length">
+                        <ul>
+                            <li v-for="error in errors">{{ error }}</li>
+                        </ul>
+                    </p>
+                </form>
+            </div>
+                
+            <div v-for="(plan, index) in plans" class="in-plan card">
+                <h2>В планах</h2>
+                <div class="card-text">
+                    <label for="card-title">Заголовок</label>
+                    <input v-model="titleEdited" v-if="plan.isEdit" type="text" :placeholder="plan.title">
+                    <p v-if="!plan.isEdit">{{ plan.title }}</p>
+                </div>
+                <div class="card-text">
+                    <label for="card-desc">Описание</label>
+                    <input v-model="descriptionEdited" v-if="plan.isEdit" type="text" :placeholder="plan.description">
+                    <p v-if="!plan.isEdit"> {{ plan.description }} </p>
+                </div>
+                <div class="card-text">
+                    <label for="card-deadline">Дэдлайн</label>
+                    <input v-model="deadlineEdited" v-if="plan.isEdit" type="date" :placeholder="plan.deadline">
+                    <p v-if="!plan.isEdit">{{ plan.deadline }}</p>
+                </div>
+                <div class="buttons">
+                    <button v-if="!plan.isEdit" @click="goFromPlan(index)" type="submit">Начать выполнение</button>
+                    <button v-if="!plan.isEdit" @click="edit(index)">Редактировать</button>
+                    <button v-if="plan.isEdit" @click="editAccept(index)" type="submit">Подтвердить изменения</button>
+                    <button v-if="plan.isEdit" @click="editCancel(index)" type="submit">Отменить изменения</button>
+                    <button @click="deleteCard(index)" type="submit">Удалить карточку</button>
+                </div>
+                <p>{{time}}</p>
+            </div>
+        </div>
+            
+            <div class="menu">
+                <div v-for="(work, index) in works" class="in-work card">
+                    <h2>В работе</h2>
+                    <div class="card-text">
+                        <label for="card-title">Заголовок</label>
+                        <p>{{ work.title }}</p>
+                    </div>
+                    <div class="card-text">
+                        <label for="card-desc">Описание</label>
+                        <p> {{ work.description }} </p>
+                    </div>
+                    <div class="card-text">
+                        <label for="card-deadline">Дэдлайн</label>
+                        <p>{{ work.deadline }}</p>
+                    </div>
+                    <ul>
+                        <li v-for="reason in work.reasons">Причина возврата: {{reason}}</li>
+                    </ul>
+                    <button @click="goTest(index)" type="submit">Подтвердить выполнение</button>
+                    <p>{{time}}</p>
+                </div>
+            </div>
+            
+            
+            <div class="menu">
+                <div v-for="(test, index) in tests" class="test card">
+                    <h2>Тестирование</h2>
+                    <div class="card-text">
+                        <label for="card-title">Заголовок</label>
+                        <p>{{ test.title }}</p>
+                    </div>
+                    <div class="card-text">
+                        <label for="card-desc">Описание</label>
+                        <p> {{ test.description }} </p>
+                    </div>
+                    <div class="card-text">
+                        <label for="card-deadline">Дэдлайн</label>
+                        <p>{{ test.deadline }}</p>
+                    </div>
+                    <ul>
+                        <li v-for="reason in test.reasons">Причина возврата: {{reason}}</li>
+                    </ul>
+                    <input id="clearInp" v-if="test.isReturn" type="text" v-model="reason" >
+                    <div class="btns">
+                        <button v-if="test.isReturn" @click="goWork(index)" type="submit">Подтвердить</button>
+                        <button v-if="test.isReturn" @click="cancelReturn(index)" type="submit">Отменить</button>
+                        <button v-if="!test.isReturn" @click="setReason(index)" type="submit">Вернуть задачу</button>
+                        <button v-if="!test.isReturn" @click="completeTask(index)" type="submit">Завершить задачу</button>
+                    </div>
+                    <p>{{time}}</p>
+                </div>
+            </div>
+                
+                
+                
+            <div class="menu">
+                <div v-for="(completed, index) in complete" class="test card">
+                    <h2>Завершено</h2>
+                    <div class="card-text">
+                        <label for="card-title">Заголовок</label>
+                        <p>{{ completed.title }}</p>
+                    </div>
+                    <div class="card-text">
+                        <label for="card-desc">Описание</label>
+                        <p> {{ completed.description }} </p>
+                    </div>
+                    <ul>
+                        <li v-for="reason in completed.reasons">Причина возврата: {{reason}}</li>
+                    </ul>
+                    <div class="card-text">
+                        <label for="card-deadline">Дэдлайн</label>
+                        <p>{{ completed.deadline }}</p>
+                    </div>
+                    <p>{{ isTime }}</p>
+                </div>
+            </div>
+        </div>
     `,
 
     methods:{
@@ -15,7 +154,7 @@ Vue.component("plan-work", {
                     isReturn: false,
                     reasons: []
                 }
-                
+
                 this.$emit('creating-card', cardInWork)
                 this.title = null
                 this.description = null
@@ -134,7 +273,6 @@ Vue.component("plan-work", {
             toTest.isReturn = false
         }
     },
-    },
 
     data(){
         return {
@@ -178,5 +316,3 @@ let app = new Vue({
     data: {
     }
 })
-
-
